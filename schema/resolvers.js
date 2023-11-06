@@ -1,4 +1,6 @@
+const { Cookie } = require('@mui/icons-material');
 const {UserList,MovieList } = require('../FakeData');
+const jwt = require('jsonwebtoken')
 const _ = require("lodash")
 
 
@@ -56,7 +58,44 @@ const resolvers = {
             const id = args.id;
             _.remove(UserList, (user) => user.id === Number(id));
             return null
-        }
+        },
+        login: (_, __, { res }) => {
+
+            const user = {
+              id: 1,
+              userName: 'ajith',
+            };
+
+            const accessToken = jwt.sign({ user }, 'rahul', { expiresIn: '1h' });
+            const refreshToken = jwt.sign({ user }, 'rahul', { expiresIn: '1d' });
+      
+       
+            res.cookie('refreshToken', refreshToken,)
+            .header('authorization',accessToken);
+      
+       
+            return { accessToken, refreshToken,};
+          },
+
+
+          refreshAccessToken: (_, __, { req }) => {
+
+            const refreshToken = req.cookies["refreshToken"];
+            console.log(refreshToken)
+      
+            if (!refreshToken) {
+              throw new Error('Access Denied. No refresh token provided.');
+            }
+      
+            try {
+              const decoded = jwt.verify(refreshToken, 'rahul');
+              const accessToken = jwt.sign({ user: decoded.user }, 'rahul', { expiresIn: '1h' });
+      
+              return { accessToken };
+            } catch (error) {
+              throw new Error('Invalid refresh token.');
+            }
+          },
     },
 }
 

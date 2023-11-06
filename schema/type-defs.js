@@ -44,6 +44,8 @@ type Mutation {
 createUser(input:CreateUserInput!):User
 updateUsername(input:UpdateUsernameInput!):User
 deleteUser(id:ID!):User
+login: Token
+ refreshAccessToken: Token
 }
 
 enum Nationality {
@@ -54,6 +56,11 @@ enum Nationality {
     GERMANY
 
 }
+
+type Token {
+    accessToken: String!
+    refreshToken: String!
+  }
 
 `;
 
