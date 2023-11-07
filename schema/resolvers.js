@@ -1,4 +1,3 @@
-const { Cookie } = require('@mui/icons-material');
 const {UserList,MovieList } = require('../FakeData');
 const jwt = require('jsonwebtoken')
 const _ = require("lodash")
@@ -6,21 +5,33 @@ const _ = require("lodash")
 
 const resolvers = {
     Query: {
-        users: () => {
+        users: (parent,args,context) => {
+            if(!context.user){
+                return null
+            }
             return UserList
         },      
 
-        user: (parent,args) => {
+        user: (parent,args,context) => {
+            if(!context.user){
+                return null
+            }
             const id = args.id;
             const user = _.find(UserList, { id : Number(id) })
             return user;
         },
 
-        movies: () => {
+        movies: (parent, args,context) => {
+            if(!context.user){
+                return null
+            }
             return MovieList
         },
 
-        movie: (parent, args) => {
+        movie: (parent, args,context) => {
+            if(!context.user){
+                return null
+            }
             const name = args.name;
             const movie = _.find(MovieList, { name:name })
             return movie;
@@ -54,9 +65,9 @@ const resolvers = {
          );
             return userUpdated
     },
-        deleteUser: (parent,args) => {
+        deleteUser:  (parent,args) => {
             const id = args.id;
-            _.remove(UserList, (user) => user.id === Number(id));
+             _.remove(UserList, (user) => user.id === Number(id));
             return null
         },
         login: (_, __, { res }) => {
@@ -70,17 +81,13 @@ const resolvers = {
             const refreshToken = jwt.sign({ user }, 'rahul', { expiresIn: '1d' });
       
        
-            res.cookie('refreshToken', refreshToken,)
-            .header('authorization',accessToken);
-      
-       
             return { accessToken, refreshToken,};
           },
 
 
-          refreshAccessToken: (_, __, { req }) => {
+          refreshAccessToken: (parent,args) => {
 
-            const refreshToken = req.cookies["refreshToken"];
+            const { refreshToken } = args;
             console.log(refreshToken)
       
             if (!refreshToken) {

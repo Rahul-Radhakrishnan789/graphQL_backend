@@ -7,8 +7,6 @@ const { ApolloServer } = require('apollo-server-express');
 const port = 4000;
 const path = '/graphql'
 
-
-
 const app = express()
 app.use(cors());
 app.use(express.json())
@@ -20,15 +18,13 @@ const {typeDefs} = require('./schema/type-defs')
 
 const {resolvers} = require("./schema/resolvers")
 
+const { authMiddleware } = require('./middleware/userAuth'); 
+
 async function startServer() {
     const apolloServer = new ApolloServer({
       typeDefs,
       resolvers,
-      context: ({ req, res }) => {
-        const accessToken = req.headers.accessToken || '';
-
-        return { req, res, accessToken };
-      },
+      context: authMiddleware,
     });
     await apolloServer.start();
     apolloServer.applyMiddleware({ app, path });

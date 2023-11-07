@@ -1,22 +1,23 @@
-const jwt = require('jsonwebtoken')
+const jwt = require('jsonwebtoken');
 
+  const authMiddleware = ({ req }) => {
+    let token = req.body.token || req.query.token || req.headers.authorization;
 
-const userAuth = (req,res,next) => {
-    const accessToken = req.headers['authorization'];
-  const refreshToken = req.cookies['refreshToken'];
-
-  if (!accessToken && !refreshToken) {
-    return res.status(401).send('Access Denied. No token provided.');
-  }
-
-  jwt.verify(refreshToken,'rahul',(err,decoded) => {
-    if(err){
-        res.status(500).json({error:"authentication failed"})
+    if (req.headers.authorization) {
+      token = token.split(' ').pop().trim();
     }
-    else{
-        next()
-    }
-})
-}
 
-module.exports = userAuth;
+    if (token) {
+      try {
+        const decoded = jwt.verify(token, 'rahul'); 
+        req.user = decoded.user.userName; 
+      } catch (error) {
+        console.log('Invalid token');
+      }
+    }
+
+
+    return req;
+  };
+
+module.exports = {authMiddleware}
