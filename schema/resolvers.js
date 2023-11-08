@@ -38,7 +38,10 @@ const resolvers = {
         },
     },
     User: {
-        favouriteMovies: () => {
+        favouriteMovies: (parent,args,context) => {
+            if(!context.user){
+                return null
+            }
             return _.filter(MovieList, (movie) => 
                 movie.yearOfPublication >=2000 && movie.yearOfPublication <= 2010
             )
